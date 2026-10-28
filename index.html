@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>포켓몬: 글리치 월드 배틀</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #111 url('watermarked_img_13385715716764008888.png') no-repeat center center fixed;
+            background-size: cover;
+            color: #00ffcc;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .game-container {
+            width: 800px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px solid #00ffcc;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px #00ffcc;
+        }
+        h1 {
+            text-align: center;
+            color: #ff00ff;
+            text-shadow: 2px 2px #00ffcc;
+            margin-top: 0;
+        }
+        .battle-screen {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: rgba(20, 20, 40, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed #ff00ff;
+        }
+        .fighter {
+            width: 45%;
+            text-align: center;
+        }
+        .hp-bar-container {
+            width: 100%;
+            background: #444;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #fff;
+            margin-top: 10px;
+        }
+        .hp-bar {
+            height: 100%;
+            background: #00ff66;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+        .log-box {
+            height: 120px;
+            background: #000;
+            border: 2px solid #00ffcc;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 14px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        button {
+            background: #220044;
+            color: #00ffcc;
+            border: 2px solid #ff00ff;
+            padding: 12px;
+            font-size: 16px;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #ff00ff;
+            color: #000;
+            box-shadow: 0 0 10px #ff00ff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>⚡ POKEMON: GLITCH WORLD ⚡</h1>
+    
+    <div class="battle-screen">
+        <div class="fighter" id="player-section">
+            <h3 id="player-name">포켓몬 선택 중...</h3>
+            <p>HP: <span id="player-hp-text">100/100</span></p>
+            <div class="hp-bar-container">
+                <div class="hp-bar" id="player-hp"></div>
+            </div>
+        </div>
+        <div class="fighter" id="enemy-section">
+            <h3 id="enemy-name">미씽노</h3>
+            <p>HP: <span id="enemy-hp-text">100/100</span></p>
+            <div class="hp-bar-container">
+                <div class="hp-bar" id="enemy-hp"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="log-box" id="log-box">
+        글리치 월드에 입장했습니다. 상대 포켓몬이 나타났습니다!<br>
+    </div>
+
+    <div class="controls" id="action-buttons">
+        <button onclick="selectPlayer('pichu')">뾰족귀 피츄 출전</button>
+        <button onclick="selectPlayer('greninja')">지우의 개굴닌자 출전</button>
+        <button onclick="selectPlayer('monokachu')">흑백카츄 출전</button>
+        <button onclick="selectPlayer('mosssnorlax')">이끼만보 출전</button>
+    </div>
+</div>
+
+<script>
+    const pokemons = {
+        pichu: { name: "뾰족귀 피츄", hp: 120, maxHp: 120, moves: ["볼트태클", "아이언테일", "전기볼트", "사념의박치기"] },
+        greninja: { name: "지우의 개굴닌자", hp: 150, maxHp: 150, moves: ["물수리검", "거합참", "그림자분신", "제비반환"] },
+        monokachu: { name: "흑백카츄", hp: 140, maxHp: 140, moves: ["10만볼트", "전광석화", "치트펀치", "레트로노이즈"] },
+        mosssnorlax: { name: "이끼만보", hp: 200, maxHp: 200, moves: ["누르기", "기가드레인", "광합성", "씨뿌리기"] }
+    };
+
+    const enemies = [
+        { name: "미씽노 (MissingNo.)", hp: 180, maxHp: 180, moves: ["데이터붕괴", "결함블라스트", "스카이댄스"] },
+        { name: "버리맨 (Buryman)", hp: 160, maxHp: 160, moves: ["에러슬러지", "섀도다이브", "시스템다운"] }
+    ];
+
+    let player = null;
+    let enemy = null;
+
+    function log(message) {
+        const box = document.getElementById("log-box");
+        box.innerHTML += message + "<br>";
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function selectPlayer(key) {
+        player = JSON.parse(JSON.stringify(pokemons[key]));
+        enemy = JSON.parse(JSON.stringify(enemies[Math.floor(Math.random() * enemies.length)]));
+        
+        updateUI();
+        log(`[출전] ${player.name}이(가) 글리치 월드에 소환되었습니다!`);
+        log(`[조우] 야생의 ${enemy.name}과(와) 조우했습니다!`);
+
+        // 기술 버튼으로 변경
+        let btnHtml = "";
+        player.moves.forEach(move => {
+            btnHtml += `<button onclick="playerAttack('${move}')">${move}</button>`;
+        });
+        document.getElementById("action-buttons").innerHTML = btnHtml;
+    }
+
+    function updateUI() {
+        if (!player) return;
+        document.getElementById("player-name").innerText = player.name;
+        document.getElementById("player-hp-text").innerText = `${player.hp}/${player.maxHp}`;
+        document.getElementById("player-hp").style.width = `${(player.hp / player.maxHp) * 100}%`;
+
+        document.getElementById("enemy-name").innerText = enemy.name;
+        document.getElementById("enemy-hp-text").innerText = `${enemy.hp}/${enemy.maxHp}`;
+        document.getElementById("enemy-hp").style.width = `${(enemy.hp / enemy.maxHp) * 100}%`;
+    }
+
+    function playerAttack(move) {
+        if (player.hp <= 0 || enemy.hp <= 0) return;
+
+        let dmg = Math.floor(Math.random() * 20) + 15;
+        enemy.hp = Math.max(0, enemy.hp - dmg);
+        log(`▶ ${player.name}의 '${move}'! ${enemy.name}에게 ${dmg}의 데미지!`);
+        updateUI();
+
+        if (enemy.hp === 0) {
+            log(`🎉 승리! ${enemy.name}의 데이터가 완전히 소멸했습니다!`);
+            resetGame();
+            return;
+        }
+
+        // 적 턴
+        setTimeout(() => {
+            let enemyMove = enemy.moves[Math.floor(Math.random() * enemy.moves.length)];
+            let enemyDmg = Math.floor(Math.random() * 20) + 10;
+            player.hp = Math.max(0, player.hp - enemyDmg);
+            log(`⚠️ ${enemy.name}의 '${enemyMove}' 반격! ${player.name}이(가) ${enemyDmg}의 데미지를 입었습니다.`);
+            updateUI();
+
+            if (player.hp === 0) {
+                log(`💀 패배... ${player.name}의 데이터가 오작동을 일으켰습니다.`);
+                resetGame();
+            }
+        }, 800);
+    }
+
+    function resetGame() {
+        setTimeout(() => {
+            document.getElementById("action-buttons").innerHTML = `
+                <button onclick="selectPlayer('pichu')">뾰족귀 피츄 출전</button>
+                <button onclick="selectPlayer('greninja')">지우의 개굴닌자 출전</button>
+                <button onclick="selectPlayer('monokachu')">흑백카츄 출전</button>
+                <button onclick="selectPlayer('mosssnorlax')">이끼만보 출전</button>
+            `;
+            log("--- 새로운 글리치 탐색 준비 완료 ---<br>");
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>
